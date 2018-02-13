@@ -2,8 +2,10 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <memory>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "Shape.h"
 
 // print compile result
 //   shader: shader object name
@@ -151,6 +153,14 @@ GLuint loadProgram(const char* vert, const char* frag)
     return vstat && fstat ? createProgram(vsrc.data(), fsrc.data()) : 0;
 }
 
+constexpr Object::Vertex rectangleVertex[] =
+{
+    { { -0.5f, -0.5f } },
+    { {  0.5f, -0.5f } },
+    { {  0.5f,  0.5f } },
+    { { -0.5f,  0.5f } },
+};
+
 int main()
 {
     // initialize GLFW
@@ -199,6 +209,10 @@ int main()
     // create program object
     const GLuint program { loadProgram("point.vsh", "point.fsh") };
 
+    // create shape data
+    std::unique_ptr<const Shape> shape { new Shape(2, 4, rectangleVertex) };
+
+
     while (glfwWindowShouldClose(window) == GL_FALSE)
     {
         // clear window(clear only color buffer)
@@ -207,9 +221,7 @@ int main()
 
         glUseProgram(program);
 
-        //
-        // draw
-        //
+        shape->draw();
 
         // swap color buffer
         glfwSwapBuffers(window);
