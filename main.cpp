@@ -5,6 +5,7 @@
 #include <memory>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "Window.h"
 #include "Shape.h"
 
 // print compile result
@@ -156,19 +157,19 @@ GLuint loadProgram(const char* vert, const char* frag)
 constexpr Object::Vertex rectangleVertex[] =
 {
     { { -0.5f, -0.5f } },
-    { {  0.5f, -0.5f } },
-    { {  0.5f,  0.5f } },
-    { { -0.5f,  0.5f } },
+    { {  1.5f, -0.5f } },
+    { {  1.5f,  1.5f } },
+    { { -0.5f,  1.5f } },
 };
 
-int main()
+bool configure()
 {
     // initialize GLFW
     if (glfwInit() == GL_FALSE)
     {
         std::cerr << "Can't initialize GLFW" << std::endl;
 
-        return 1;
+        return false;
     }
 
     // register method on terminate
@@ -180,31 +181,24 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // create window 
-    GLFWwindow *const window { glfwCreateWindow(640, 480, "Hello!", NULL, NULL) };
-    if (window == nullptr)
+    return true;
+}
+
+int main()
+{
+    if (!configure())
     {
-        // create window is failured
-        std::cerr << "Can't crateGLFW window." << std::endl;
         return 1;
     }
 
-    // add window to OpenGL target
-    glfwMakeContextCurrent(window);
-
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK)
-    {
-        // failure GLEW initialize
-        std::cerr << "Can't initialize GLEW" << std::endl;
-        return 1;
-    }
-
-    // wait V-Sync min count
-    glfwSwapInterval(1);
+    // createWindow
+    Window window;
 
     // set background color
     glClearColor(1.f, 1.f, 1.f, 0.f);
+
+    // set viewport
+    glViewport(100, 50, 300, 300);
 
     // create program object
     const GLuint program { loadProgram("point.vsh", "point.fsh") };
@@ -213,7 +207,7 @@ int main()
     std::unique_ptr<const Shape> shape { new Shape(2, 4, rectangleVertex) };
 
 
-    while (glfwWindowShouldClose(window) == GL_FALSE)
+    while (window.shouldClose() == GL_FALSE)
     {
         // clear window(clear only color buffer)
         // frame buffer has color buffer, depth buffer, stencil buffer and etc...
@@ -223,11 +217,7 @@ int main()
 
         shape->draw();
 
-        // swap color buffer
-        glfwSwapBuffers(window);
-
-        // wait event like mouse, touch..
-        glfwWaitEvents(); 
+        window.swapBuffers();
     }
 
     return 0;
