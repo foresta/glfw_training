@@ -8,6 +8,7 @@
 #include "Window.h"
 #include "Shape.h"
 
+
 // print compile result
 //   shader: shader object name
 //   str: error string
@@ -157,9 +158,9 @@ GLuint loadProgram(const char* vert, const char* frag)
 constexpr Object::Vertex rectangleVertex[] =
 {
     { { -0.5f, -0.5f } },
-    { {  1.5f, -0.5f } },
-    { {  1.5f,  1.5f } },
-    { { -0.5f,  1.5f } },
+    { {  0.5f, -0.5f } },
+    { {  0.5f,  0.5f } },
+    { { -0.5f,  0.5f } },
 };
 
 bool configure()
@@ -197,11 +198,14 @@ int main()
     // set background color
     glClearColor(1.f, 1.f, 1.f, 0.f);
 
-    // set viewport
-    glViewport(100, 50, 300, 300);
-
+    
     // create program object
     const GLuint program { loadProgram("point.vsh", "point.fsh") };
+
+    // get uniform variable (aspect) position
+    const GLint sizeLoc { glGetUniformLocation(program, "size") };
+    const GLint scaleLoc { glGetUniformLocation(program, "scale") };
+    const GLint locationLoc { glGetUniformLocation(program, "location") };
 
     // create shape data
     std::unique_ptr<const Shape> shape { new Shape(2, 4, rectangleVertex) };
@@ -214,6 +218,10 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(program);
+
+        glUniform2fv(sizeLoc, 1, window.getSize());
+        glUniform1f(scaleLoc, window.getScale()); 
+        glUniform2fv(locationLoc, 1, window.getLocation());
 
         shape->draw();
 
